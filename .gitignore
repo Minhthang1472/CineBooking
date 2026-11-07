@@ -1,0 +1,37 @@
+# Thư mục build của .NET
+bin/
+obj/
+
+# File cấu hình cá nhân của VS Code
+.vscode/
+
+# Thư mục chứa ảnh/file upload (nếu bạn không muốn đẩy ảnh lên git)
+wwwroot/uploads/
+wwwroot/avatars/
+wwwroot/thumbnails/
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+.venv-tests/
+tests/robot-results/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
