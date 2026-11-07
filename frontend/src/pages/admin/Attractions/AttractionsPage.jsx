@@ -5,7 +5,7 @@ import { attractionApi } from '../../../api/marketingApi';
 import { useNotification } from '../../../context/notificationContext';
 import { uploadToCloudinary } from '../../../utils/cloudinaryUpload';
 
-const API_BASE = 'http://localhost:5262';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5262';
 
 const { Title, Text } = Typography;
 

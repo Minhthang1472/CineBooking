@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { attractionApi } from '../../api/marketingApi';
 
-const API_BASE = 'http://localhost:5262';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5262';
 const GOLD = '#C9A84C';
 const DARK = '#0D1B2A';
 

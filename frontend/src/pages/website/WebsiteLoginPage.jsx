@@ -10,7 +10,7 @@ import {
 
 const GOLD = '#C9A84C';
 const DARK = '#0D1B2A';
-const API = 'http://localhost:5262/api';
+const API = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5262'}/api`;
 
 // ✅ Đặt InputField NGOÀI component để tránh re-mount mỗi lần render
 const inputStyle = {
@@ -109,18 +109,22 @@ export default function WebsiteLoginPage() {
     }
     setLoading(true);
     try {
-      await axios.post(`${API}/UserManagement`, {
+      await axios.post(`${API}/Auth/register`, {
         fullName: regForm.fullName,
         phone: regForm.phone,
         email: regForm.email,
-        passwordHash: regForm.password,
-        roleId: 2,
+        password: regForm.password,
       });
       message.success('Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.');
       setMode('login');
       setLoginForm({ email: regForm.email, password: '' });
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Đăng ký thất bại. Email có thể đã được sử dụng!';
+      const responseData = err.response?.data;
+      const validationMessage = responseData?.errors
+        ? Object.values(responseData.errors).flat()[0]
+        : null;
+      const errMsg = responseData?.message || responseData?.Message || validationMessage ||
+        'Đăng ký thất bại. Vui lòng kiểm tra thông tin và thử lại!';
       message.error(errMsg);
     } finally {
       setLoading(false);

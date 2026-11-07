@@ -7,7 +7,7 @@ import { uploadToCloudinary } from '../../../utils/cloudinaryUpload';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 
-const API_BASE = 'http://localhost:5262';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5262';
 
 const CustomQuillEditor = ({ value, onChange }) => {
   const containerRef = useRef(null);

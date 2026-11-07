@@ -2,21 +2,36 @@ import React, { useState } from 'react';
 import { Card, Form, Input, Button, Typography, message, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 
 const { Title, Text } = Typography;
+const API = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5262'}/api`;
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     setLoading(true);
-    // Giả lập gọi API Đăng ký
-    setTimeout(() => {
-      message.success('Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
-      navigate('/login'); // Đăng ký xong tự động chuyển về trang Đăng nhập
+    try {
+      const response = await axios.post(`${API}/Auth/register`, {
+        fullName: values.fullName,
+        phone: values.phone,
+        email: values.email,
+        password: values.password,
+      });
+      message.success(response.data.message || response.data.Message || 'Đăng ký thành công! Vui lòng đăng nhập.');
+      navigate('/login');
+    } catch (error) {
+      const responseData = error.response?.data;
+      const validationMessage = responseData?.errors
+        ? Object.values(responseData.errors).flat()[0]
+        : null;
+      message.error(responseData?.message || responseData?.Message || validationMessage ||
+        'Đăng ký thất bại. Vui lòng kiểm tra thông tin và thử lại!');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (

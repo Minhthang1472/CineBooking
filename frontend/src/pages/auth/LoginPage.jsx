@@ -7,6 +7,7 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
 const { Title, Text } = Typography;
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5262';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const LoginPage = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5262/api/Auth/login', {
+      const res = await axios.post(`${API_BASE}/api/Auth/login`, {
         email: values.email,
         password: values.password
       });

@@ -22,6 +22,8 @@ node_modules
 dist
 dist-ssr
 *.local
+.venv-tests/
+tests/robot-results/
 
 # Editor directories and files
 .vscode/*

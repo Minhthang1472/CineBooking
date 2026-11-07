@@ -46,7 +46,7 @@ namespace HotelManagementApi.Controllers
         // 2. CẤP QUYỀN CHO VAI TRÒ
         // ====================================================
         [HttpPost("assign-permission")]
-        public async Task<IActionResult> AssignPermission([FromBody] AssignPermissionRequest request)
+        public async Task<IActionResult> AssignPermission([FromBody] AssignPermissionToRoleRequest request)
         {
             var role = await _context.Roles
                 .Include(r => r.Permissions) 
@@ -105,7 +105,7 @@ namespace HotelManagementApi.Controllers
     // ====================================================
     // CÁC CLASS PHỤ TRỢ NẰM NGOÀI CONTROLLER
     // ====================================================
-    public class AssignPermissionRequest
+    public class AssignPermissionToRoleRequest
     {
         public int RoleId { get; set; }
         public int PermissionId { get; set; }

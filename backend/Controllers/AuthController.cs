@@ -1,4 +1,6 @@
 using HotelManagementApi.Models;
+using HotelManagementApi.Helpers;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -31,7 +33,7 @@ namespace HotelManagementApi.Controllers
 
             // 2. Kiểm tra tài khoản và mật khẩu
             // Lưu ý: Trong SQL mẫu của bạn, mật khẩu đang lưu là "hash1", "hash2"...
-            if (user == null || user.PasswordHash != request.Password)
+            if (user == null || !PasswordHelper.Verify(user, request.Password))
             {
                 return Unauthorized(new { Message = "Email hoặc mật khẩu không đúng!" });
             }
@@ -84,6 +86,47 @@ namespace HotelManagementApi.Controllers
                 Email    = user.Email,
                 Message  = "Đăng nhập thành công"
             });
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            var email = request.Email.Trim();
+            if (await _context.Users.AnyAsync(user => user.Email == email))
+            {
+                return Conflict(new { Message = "Email này đã được sử dụng." });
+            }
+
+            var guestRole = await _context.Roles
+                .FirstOrDefaultAsync(role => role.Name == "Guest");
+            if (guestRole == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { Message = "Vai trò khách hàng chưa được cấu hình." });
+            }
+
+            var user = new User
+            {
+                FullName = request.FullName.Trim(),
+                Phone = request.Phone.Trim(),
+                Email = email,
+                PasswordHash = PasswordHelper.Hash(request.Password),
+                RoleId = guestRole.Id,
+                Status = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(user);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 })
+            {
+                return Conflict(new { Message = "Email này đã được sử dụng." });
+            }
+
+            return Ok(new { Message = "Đăng ký thành công! Vui lòng đăng nhập để tiếp tục." });
         }
     }
 }

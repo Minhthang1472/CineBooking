@@ -1,4 +1,5 @@
 using HotelManagementApi.Models;
+using HotelManagementApi.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -68,10 +69,13 @@ namespace HotelManagementApi.Controllers
             var userId = GetCurrentUserId();
             var user = await _context.Users.FindAsync(userId);
 
-            if (user.PasswordHash != request.OldPassword)
+            if (user == null)
+                return Unauthorized(new { Message = "Không tìm thấy tài khoản." });
+
+            if (!PasswordHelper.Verify(user, request.OldPassword))
                 return BadRequest(new { Message = "Mật khẩu cũ không chính xác." });
 
-            user.PasswordHash = request.NewPassword;
+            user.PasswordHash = PasswordHelper.Hash(request.NewPassword);
             await _context.SaveChangesAsync();
 
             return Ok(new { Message = "Đổi mật khẩu thành công!" });

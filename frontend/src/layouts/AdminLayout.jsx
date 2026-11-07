@@ -25,6 +25,7 @@ import {
   AuditOutlined,
   AppstoreOutlined,
   MenuFoldOutlined,
+  MenuUnfoldOutlined,
   BulbOutlined,
   BulbFilled,
   LoginOutlined,
