@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using HotelManagementApi.Models;
 
 namespace HotelManagementApi.Controllers
@@ -14,10 +15,12 @@ namespace HotelManagementApi.Controllers
     public class ServicesController : ControllerBase
     {
         private readonly HotelDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ServicesController(HotelDbContext context)
+        public ServicesController(HotelDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // GET: api/Services
@@ -95,6 +98,35 @@ namespace HotelManagementApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // POST: api/Services/{id}/images
+        [HttpPost("{id}/images")]
+        public async Task<IActionResult> UploadServiceImage(int id, [FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Vui lòng chọn ảnh hợp lệ.");
+
+            var service = await _context.Services.FindAsync(id);
+            if (service == null)
+                return NotFound();
+
+            var uploadsFolder = Path.Combine(_env.WebRootPath ?? Directory.GetCurrentDirectory(), "service_images");
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = "service_" + id + "_" + Guid.NewGuid().ToString() + "_" + file.FileName;
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            // Update service with image info (optional)
+            // service.ImageUrl = $"/service_images/{uniqueFileName}";
+            // await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Image uploaded successfully", FileName = uniqueFileName });
         }
 
         private bool ServiceExists(int id)

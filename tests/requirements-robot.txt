@@ -1,2 +1,5 @@
 robotframework>=7.0,<8.0
 robotframework-browser>=18.0,<20.0
+robotframework-requests>=0.9
+requests>=2.28
+PyJWT>=2.6

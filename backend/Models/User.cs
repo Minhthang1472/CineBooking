@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace HotelManagementApi.Models;
 
@@ -22,6 +21,8 @@ public partial class User
     public bool? Status { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public string AvatarUrl { get; set; } = null!; // NEW PROPERTY - added for TC1.9 avatar upload
 
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 

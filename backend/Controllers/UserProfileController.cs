@@ -100,10 +100,15 @@ namespace HotelManagementApi.Controllers
             }
 
             var avatarUrl = "/avatars/" + uniqueFileName;
-            
-            /* Lưu ý nhỏ: Bảng Users trong DB SQL của bạn hiện tại CHƯA CÓ cột AvatarUrl. 
-               Mình đã cấu hình lưu file thành công, nếu bạn muốn lưu vào DB thì 
-               hãy Alter Table Users thêm cột AvatarUrl nhé. */
+
+            // Lưu AvatarUrl vào bảng Users (cột avatar_url đã tồn tại trong DB)
+            var userId = GetCurrentUserId();
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.AvatarUrl = avatarUrl;
+                await _context.SaveChangesAsync();
+            }
 
             return Ok(new { Message = "Upload Avatar thành công!", AvatarUrl = avatarUrl });
         }

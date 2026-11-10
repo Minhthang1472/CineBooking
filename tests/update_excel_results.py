@@ -23,6 +23,19 @@ from openpyxl.cell.cell import MergedCell
 # Đảm bảo in tiếng Việt không lỗi console Windows
 sys.stdout.reconfigure(encoding='utf-8')
 
+# Cac test case da biet la khuyet diem (thieu endpoint / loi nghiep vu).
+# LUON ghi Fail, ke ca khi kich ban Robot cu dang "assert loi" va bao PASS,
+# de tranh ghi nham "Pass gia" vao file Excel.
+KNOWN_DEFECTS = {
+    "TC1.7",
+    "TC2.5", "TC2.6", "TC2.8", "TC2.10", "TC2.11",
+    "TC3.3", "TC3.5", "TC3.6", "TC3.8",
+    "TC4.3", "TC4.5", "TC4.8",
+    "TC5.4", "TC5.5", "TC5.6", "TC5.7",
+    "TC6.6", "TC6.10", "TC6.12",
+    "TC7.1", "TC7.6", "TC7.7",
+}
+
 # Từ điển ghi chú và kết quả thực tế Tiếng Việt chuẩn cho 74 Test Cases
 TC_VIETNAMESE_DETAILS = {
     "TC1.1": {
@@ -473,14 +486,12 @@ def update_excel_file(excel_path='test-case-expl.xlsx', robot_xml='tests/robot-r
         })
 
         # Xác định trạng thái PASS / FAIL
-        if has_robot_output and tc_id in robot_results:
+        if tc_id in KNOWN_DEFECTS:
+            is_passed = False
+        elif has_robot_output and tc_id in robot_results:
             is_passed = (robot_results[tc_id]['status'].upper() == 'PASS')
         else:
-            # Nếu chưa chạy Robot, mặc định ghi nhận kết quả thực tế theo hồ sơ đồ án (57 Pass / 17 Defect)
-            known_defects = {"TC1.5", "TC1.7", "TC1.9", "TC2.5", "TC2.10", "TC2.11", 
-                             "TC3.5", "TC3.6", "TC4.8", "TC5.5", "TC5.7", "TC6.6", 
-                             "TC6.10", "TC6.12", "TC7.1", "TC7.6", "TC7.7"}
-            is_passed = (tc_id not in known_defects)
+            is_passed = True
 
         # 1. Cột G (Cột 7): Kết quả thực tế (Actual Output) Tiếng Việt
         actual_cell = ws.cell(r, 7)

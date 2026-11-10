@@ -8,7 +8,7 @@ Library           Collections
 Library           String
 Library           DateTime
 Library           processes.py    WITH NAME    ProcessLib
-Library           C:\\Users\\thang\\Desktop\\CineBooking\\tests\\jwt_helper.py    WITH NAME    JwtHelper
+Library           jwt_helper.py    WITH NAME    JwtHelper
 Suite Setup       Suite Setup
 Suite Teardown    Suite Teardown
 Test Setup        Single Test Setup
@@ -209,6 +209,12 @@ Raw Patch With Auth
     ${resp}=    Raw Patch    ${API_URL}${path}    json=${body}    headers=${headers}
     RETURN    ${resp}
 
+Upload File With Auth
+    [Arguments]    ${path}    ${file_path}    ${token}
+    &{headers}=    Create Dictionary    Authorization=Bearer ${token}
+    ${resp}=    ProcessLib.Upload File    ${API_URL}${path}    ${file_path}    headers=${headers}
+    RETURN    ${resp}
+
 Raw Delete With Auth
     [Arguments]    ${path}    ${token}
     &{headers}=    Api Headers    ${token}
@@ -271,6 +277,11 @@ Check Soft Assertions
 Clear Soft Assertions
     @{empty_list}=    Create List
     Set Suite Variable    ${SOFT_FAILURES}    ${empty_list}
+
+# Ghi nhan mot khuyet diem da biet: LUON lam test do (khong con 'pass gia')
+Mark Defect
+    [Arguments]    ${msg}
+    Append To List    ${SOFT_FAILURES}    DEFECT: ${msg}
 
 # ===================== UI KEYWORDS =====================
 Open UI Page
@@ -404,164 +415,241 @@ Get Route For Test
 Capture Test Screenshot And Cleanup
     ${tc_id}=    Fetch From Left    ${TEST NAME}    |
     ${tc_id}=    Strip String    ${tc_id}
-    ${status_tag}=    Set Variable If    '${TEST STATUS}' == 'PASS'    KHONG_LOI    CO_LOI
+    ${soft_count}=    Get Length    ${SOFT_FAILURES}
+    ${status_tag}=    Set Variable If    '${TEST STATUS}' == 'PASS' and ${soft_count} == 0    KHONG_LOI    CO_LOI
     ${screenshot_path}=    Set Variable    ${OUTPUT DIR}/screenshots/${tc_id}_${status_tag}.png
     Sleep    400ms
     Run Keyword And Ignore Error    Take Screenshot    filename=${screenshot_path}
+    Check Soft Assertions    ${tc_id}
 
 
 *** Test Cases ***
 TC1.1 | [TS1] Đăng nhập Hợp lệ & Cấp phát JWT Token
+    [Tags]    iteration1    iteration2    iteration4    iteration5
     Case TC1.1
 TC1.2 | [TS1] Đăng nhập Thất bại & Kiểm tra Đổi Mật khẩu
+    [Tags]    iteration1    iteration2    iteration4    iteration5
     Case TC1.2
 TC1.3 | [TS1] Kiểm tra Phân quyền Route & Menu theo Vai trò (RBAC)
+    [Tags]    iteration1    iteration2    iteration3    iteration4    iteration5
     Case TC1.3
 TC1.4 | [TS1] Quản lý Nhân sự & Gán Quyền cho Vai trò
+    [Tags]    iteration1    iteration4    iteration5
     Case TC1.4
 TC1.5 | [TS1] Đăng ký Tài khoản Khách hàng từ Website (Register)
+    [Tags]    iteration1    iteration5
     Case TC1.5
 TC1.6 | [TS1] Kiểm tra Token Hết hạn, Sai chữ ký & Không gửi Token
+    [Tags]    iteration1    iteration5
     Case TC1.6
 TC1.7 | [TS1] Kiểm tra Phân quyền API theo Vai trò (API-level RBAC)
+    [Tags]    iteration1    iteration5
     Case TC1.7
 TC1.8 | [TS1] Quản lý Vai trò & Gán Quyền (Roles/Permissions)
+    [Tags]    iteration1    iteration5
     Case TC1.8
 TC1.9 | [TS1] Hồ sơ Cá nhân, Cập nhật Thông tin & Upload Avatar
+    [Tags]    iteration1    iteration5
     Case TC1.9
 TC2.1 | [TS2] Quản lý Hạng phòng & Đặt Ảnh đại diện Chính (Primary Image)
+    [Tags]    iteration1    iteration4    iteration5
     Case TC2.1
 TC2.2 | [TS2] Tạo Phòng Đơn lẻ & Tạo Phòng Hàng loạt (Bulk Create)
+    [Tags]    iteration1    iteration2    iteration5
     Case TC2.2
 TC2.3 | [TS2] Sao chép (Clone) Danh mục Vật tư giữa các Phòng
+    [Tags]    iteration1    iteration2    iteration5
     Case TC2.3
 TC2.4 | [TS2] Đồng bộ Vật tư từ Kho Tổng & Tính Tồn kho Thiết bị
+    [Tags]    iteration1    iteration2    iteration4    iteration5
     Case TC2.4
 TC2.5 | [TS2] CRUD Hạng phòng & Xác nhận Thiếu API Tạo/Sửa (RoomTypes)
+    [Tags]    iteration1    iteration5
     Case TC2.5
 TC2.6 | [TS2] Xóa Ảnh Phòng: File Vật lý vs URL Cloudinary
+    [Tags]    iteration1    iteration5
     Case TC2.6
 TC2.7 | [TS2] CRUD Phòng & Cập nhật Trạng thái với Giá trị Không hợp lệ
+    [Tags]    iteration1    iteration5
     Case TC2.7
 TC2.8 | [TS2] Quản lý Thiết bị: Trùng Mã, Phân trang Biên & Tồn kho Âm
+    [Tags]    iteration1    iteration5
     Case TC2.8
 TC2.9 | [TS2] Danh mục Vật tư Phòng: CRUD & Clone với Dữ liệu Biên
+    [Tags]    iteration1    iteration5
     Case TC2.9
 TC2.10 | [TS2] Buồng phòng: Đồng bộ CleaningStatus khi Đổi Trạng thái Phòng
+    [Tags]    iteration1    iteration5
     Case TC2.10
 TC2.11 | [TS2] CRUD Tiện nghi & Gán Tiện nghi cho Hạng phòng
+    [Tags]    iteration1    iteration5
     Case TC2.11
 TC3.1 | [TS3] Tạo Đặt phòng Mới kèm Danh sách Chi tiết Phòng
+    [Tags]    iteration1    iteration2    iteration3    iteration5
     Case TC3.1
 TC3.2 | [TS3] Tra cứu Nhanh Đặt phòng theo Mã BookingCode hoặc ID
+    [Tags]    iteration2    iteration3    iteration5
     Case TC3.2
 TC3.3 | [TS3] Quy trình Check-in Khách đến & Cập nhật Trạng thái Booking
+    [Tags]    iteration2    iteration3    iteration4    iteration5
     Case TC3.3
 TC3.4 | [TS3] Cập nhật Chi tiết Phòng & Xem Lịch sử Đặt phòng theo User
+    [Tags]    iteration2    iteration4    iteration5
     Case TC3.4
 TC3.5 | [TS3] Validate Ngày Đặt phòng: CheckOut nhỏ hơn hoặc bằng CheckIn
+    [Tags]    iteration2    iteration5
     Case TC3.5
 TC3.6 | [TS3] Chống Overbooking: Đặt trùng Phòng trong cùng Khoảng ngày
+    [Tags]    iteration2    iteration5
     Case TC3.6
 TC3.7 | [TS3] CRUD Booking & Tra cứu Không tồn tại
+    [Tags]    iteration2    iteration5
     Case TC3.7
 TC3.8 | [TS3] E2E Website: Đặt phòng khi Chưa đăng nhập đến Thanh toán
+    [Tags]    iteration2    iteration5
     Case TC3.8
 TC3.9 | [TS3] Luồng Trạng thái Booking & Chuyển trạng thái Sai
+    [Tags]    iteration2    iteration5
     Case TC3.9
 TC3.10 | [TS3] Trang Checkout & Danh sách Khách đang Lưu trú (In-House)
+    [Tags]    iteration2    iteration5
     Case TC3.10
 TC4.1 | [TS4] Quản lý Danh mục Dịch vụ & Ràng buộc Không xóa khi có Dịch vụ
+    [Tags]    iteration1    iteration2    iteration5
     Case TC4.1
 TC4.2 | [TS4] Tạo Đơn Dịch vụ Phát sinh cho Phòng đang Lưu trú
+    [Tags]    iteration2    iteration3    iteration5
     Case TC4.2
 TC4.3 | [TS4] Cập nhật Nhanh Trạng thái Phòng trên Sơ đồ Housekeeping
+    [Tags]    iteration2    iteration4    iteration5
     Case TC4.3
 TC4.4 | [TS4] Báo cáo Tiêu thụ / Thất thoát Vật tư trong Phòng (Report Usage)
+    [Tags]    iteration2    iteration3    iteration5
     Case TC4.4
 TC4.5 | [TS4] CRUD Dịch vụ & Chặn xóa Dịch vụ đang được sử dụng
+    [Tags]    iteration2    iteration5
     Case TC4.5
 TC4.6 | [TS4] OrderServices: Danh sách, Chi tiết, Cập nhật & Xóa
+    [Tags]    iteration2    iteration5
     Case TC4.6
 TC4.7 | [TS4] LossAndDamages: Số lượng Biên & Truy vấn theo Booking/Phòng
+    [Tags]    iteration2    iteration5
     Case TC4.7
 TC4.8 | [TS4] Đối chiếu Tồn kho sau report-usage (Trừ kho & Cập nhật Equipment)
+    [Tags]    iteration2    iteration5
     Case TC4.8
 TC5.1 | [TS5] Tự động Tạo Hóa đơn từ Booking & Tính Thuế VAT 10%
+    [Tags]    iteration2    iteration3    iteration4    iteration5
     Case TC5.1
 TC5.2 | [TS5] Ghi nhận Thanh toán & Tự động Chuyển Trạng thái Hóa đơn sang Paid
+    [Tags]    iteration3    iteration4    iteration5
     Case TC5.2
 TC5.3 | [TS5] Khởi tạo Thanh toán Ví MoMo & Tạo Chữ ký Số HMAC-SHA256
+    [Tags]    iteration3    iteration4    iteration5
     Case TC5.3
 TC5.4 | [TS5] Xử lý Webhook IPN Callback & Xác nhận Return từ MoMo
+    [Tags]    iteration3    iteration4    iteration5
     Case TC5.4
 TC5.5 | [TS5] Thanh toán Từng phần & Hoàn trạng thái khi Xóa Payment
+    [Tags]    iteration3    iteration5
     Case TC5.5
 TC5.6 | [TS5] CRUD Hóa đơn & Ràng buộc Nhiều Hóa đơn cho một Booking
+    [Tags]    iteration3    iteration5
     Case TC5.6
 TC5.7 | [TS5] MoMo: Bảo mật Callback, Callback trùng & Lỗ hổng /confirm
+    [Tags]    iteration3    iteration5
     Case TC5.7
 TC5.8 | [TS5] VAT & Giảm giá Biên: Làm tròn và FinalTotal Âm
+    [Tags]    iteration3    iteration5
     Case TC5.8
 TC6.1 | [TS6] Quản lý Danh mục & Đăng Bài viết Tin tức kèm Ảnh bìa Cloudinary
+    [Tags]    iteration1    iteration3    iteration4    iteration5
     Case TC6.1
 TC6.2 | [TS6] Áp dụng Mã Khuyến mãi (Vouchers) & Quy trình Duyệt Đánh giá (Reviews)
+    [Tags]    iteration1    iteration3    iteration4    iteration5
     Case TC6.2
 TC6.3 | [TS6] Tổng hợp & Rebuild Dashboard KPI theo Vai trò và Kỳ báo cáo
+    [Tags]    iteration3    iteration4    iteration5
     Case TC6.3
 TC6.4 | [TS6] Tự động Ghi Nhật ký Hệ thống (AuditLogFilter) & Dọn dẹp Log cũ
+    [Tags]    iteration3    iteration4    iteration5
     Case TC6.4
 TC6.5 | [TS6] CRUD Địa điểm Du lịch & Ảnh Đại diện
+    [Tags]    iteration4    iteration5
     Case TC6.5
 TC6.6 | [TS6] Voucher: Validate min_booking_value / valid_from / valid_to / usage_limit ở Server
+    [Tags]    iteration3    iteration5
     Case TC6.6
 TC6.7 | [TS6] Reviews: Từ chối, Sửa, Xóa & Kiểm soát Quyền sở hữu
+    [Tags]    iteration3    iteration5
     Case TC6.7
 TC6.8 | [TS6] Articles: Slug, Publish/Unpublish & Ảnh bìa
+    [Tags]    iteration4    iteration5
     Case TC6.8
 TC6.9 | [TS6] Dashboard KPI: Kỳ QUARTERLY/YEARLY, Lịch sử & Rebuild theo Kỳ
+    [Tags]    iteration4    iteration5
     Case TC6.9
 TC6.10 | [TS6] AuditLogs: Bộ lọc, Thống kê, Xóa & Purge tự động
+    [Tags]    iteration4    iteration5
     Case TC6.10
 TC6.11 | [TS6] Notifications: CRUD, Đánh dấu Đã đọc & Cô lập Dữ liệu theo User
+    [Tags]    iteration4    iteration5
     Case TC6.11
 TC6.12 | [TS6] Memberships: CRUD Hạng thành viên & Áp dụng Giảm giá
+    [Tags]    iteration4    iteration5
     Case TC6.12
 TC7.1 | [TS7] Mật khẩu Lưu Plaintext & So sánh Chuỗi thô
+    [Tags]    iteration3    iteration5
     Case TC7.1
 TC7.2 | [TS7] Cấu hình CORS và JWT Secret Hardcode
+    [Tags]    iteration3    iteration5
     Case TC7.2
 TC7.3 | [TS7] XSS qua Trình soạn thảo Quill (Articles/Reviews)
+    [Tags]    iteration3    iteration5
     Case TC7.3
 TC7.4 | [TS7] SQL Injection qua Tham số Tìm kiếm & Lọc
+    [Tags]    iteration3    iteration5
     Case TC7.4
 TC7.5 | [TS7] Upload File: Giới hạn Loại/Kích thước & Path Traversal
+    [Tags]    iteration4    iteration5
     Case TC7.5
 TC7.6 | [TS7] Brute-force Đăng nhập & Rate Limiting
+    [Tags]    iteration4    iteration5
     Case TC7.6
 TC7.7 | [TS7] IDOR: Truy cập Booking của Người khác qua /Bookings/user/{id}
+    [Tags]    iteration4    iteration5
     Case TC7.7
 TC7.8 | [TS7] Toàn vẹn Dữ liệu: Unique, Khóa ngoại, Làm tròn & Múi giờ
+    [Tags]    iteration4    iteration5
     Case TC7.8
 TC7.9 | [TS7] Hiệu năng: Danh sách không Phân trang, Purge khi GET & Rebuild Dashboard
+    [Tags]    iteration4    iteration5
     Case TC7.9
 TC7.10 | [TS7] Hồi quy Hợp đồng API & Phụ thuộc SignalR không dùng
+    [Tags]    iteration4    iteration5
     Case TC7.10
 TC8.1 | [TS8] Responsive Website & Admin trên 4 Kích thước Màn hình
+    [Tags]    iteration2    iteration5
     Case TC8.1
 TC8.2 | [TS8] Đa trình duyệt: Chrome, Edge, Firefox, Safari
+    [Tags]    iteration2    iteration5
     Case TC8.2
 TC8.3 | [TS8] Xuất Excel Danh sách Booking/Hóa đơn (xlsx + file-saver)
+    [Tags]    iteration4    iteration5
     Case TC8.3
 TC8.4 | [TS8] In Hóa đơn / Xuất PDF
+    [Tags]    iteration4    iteration5
     Case TC8.4
 TC8.5 | [TS8] Website Public: Home/Rooms/Services/News/Attractions/Promotions/Reviews
+    [Tags]    iteration2    iteration5
     Case TC8.5
 TC8.6 | [TS8] Trang Hồ sơ Khách hàng: Cập nhật, Lịch sử & Avatar
+    [Tags]    iteration4    iteration5
     Case TC8.6
 
 
 *** Keywords ***
+
 Case TC1.1
     [Documentation]    [TS1] Đăng nhập hợp lệ & cấp phát JWT Token
     Login As UI    ${ADMIN_EMAIL}    ${ADMIN_PASSWORD}
@@ -619,15 +707,23 @@ Case TC1.4
     ${rnd}=    Get Current Date    result_format=%Y%m%d%H%M%S
     ${email}=    Catenate    tester${rnd}@resort.vn
     ${resp}=    Raw Post With Auth    /api/UserManagement    json={"fullName":"Nguyen Van Test","email":"${email}","phone":"0901234567","passwordHash":"hash123","roleId":3}    ${tok}
-    Should Be True    ${resp.status_code} in [200, 201, 400]    msg=status=${resp.status_code}
-    ${new_user_id}=    Db Scalar    SELECT TOP 1 id FROM Users WHERE Email='${email}' ORDER BY id DESC
-    ${has_id}=    Evaluate    len('${new_user_id}'.strip()) > 0
-    IF    ${has_id}
-        ${resp2}=    Raw Put With Auth    /api/UserManagement/${new_user_id}/change-role    json=3    ${tok}
-        Should Be True    ${resp2.status_code} in [200, 400, 404]    msg=status=${resp2.status_code}
-    END
-    ${resp3}=    Raw Post With Auth    /api/Roles/assign-permission    json={"RoleId":3,"PermissionId":4}    ${tok}
-    Should Be True    ${resp3.status_code} in [200, 400]    msg=status=${resp3.status_code}
+    Should Be True    ${resp.status_code} in [200, 201]    msg=DEFECT TC1.4: khong tao duoc nhan su, status=${resp.status_code}
+    ${new_user_id}=    Db Scalar    SELECT TOP 1 id FROM Users WHERE Email='${email}'
+    Append To List    ${CREATED_USERS}    ${new_user_id}
+    ${resp2}=    Raw Put With Auth    /api/UserManagement/${new_user_id}/change-role    json=3    ${tok}
+    Should Be True    ${resp2.status_code} == 200    msg=DEFECT TC1.4: change-role that bai, status=${resp2.status_code}
+    ${role_id}=    Db Scalar    SELECT TOP 1 role_id FROM Users WHERE id=${new_user_id}
+    Should Be Equal As Integers    ${role_id}    3    msg=DEFECT TC1.4: change-role khong luu vao DB
+    # Gan quyen cho vai tro: doc quyen hien co roi gan lai y nguyen (idempotent, khong pha du lieu)
+    ${target_role}=    Db Scalar    SELECT TOP 1 role_id FROM Role_Permissions GROUP BY role_id ORDER BY COUNT(*) DESC
+    ${csv}=    Db Scalar    SELECT STRING_AGG(CAST(permission_id AS varchar(10)), ',') FROM Role_Permissions WHERE role_id=${target_role}
+    Should Not Be Empty    ${csv}    msg=Role ${target_role} khong co quyen nao trong DB
+    ${ids}=    Evaluate    [int(x) for x in "${csv}".split(",") if x.strip()]
+    ${before}=    Db Scalar    SELECT COUNT(*) FROM Role_Permissions WHERE role_id=${target_role}
+    ${perm}=    Raw Post With Auth    /api/Permissions/assign-to-role    json={"roleId":${target_role},"permissionIds":${ids}}    ${tok}
+    Should Be True    ${perm.status_code} == 200    msg=DEFECT TC1.4: loi POST /api/Permissions/assign-to-role, status=${perm.status_code}
+    ${after}=    Db Scalar    SELECT COUNT(*) FROM Role_Permissions WHERE role_id=${target_role}
+    Should Be Equal    ${after}    ${before}    msg=DEFECT TC1.4: assign-to-role lam thay doi so quyen cua role ${target_role}
 
 Case TC1.5
     [Documentation]    [TS1] Đăng ký Tài khoản Khách hàng từ Website (Register)
@@ -667,16 +763,18 @@ Case TC1.6
     Should Be True    ${r5.status_code} in [401, 403]    msg=status=${r5.status_code}
 
 Case TC1.7
-    [Documentation]    [TS1] API-level RBAC: Receptionist goi endpoint quan tri
+    [Documentation]    [TS1] Kiểm tra Phân quyền API theo Vai trò (API-level RBAC)
     Open Admin Route    /admin/dashboard
-    ${rec_resp}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"reception1@hotel.com","password":"hash3"}
+    ${rec_resp}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"reception1@hotel.com","password":"admin"}
+    Should Be True    ${rec_resp.status_code} == 200    msg=Khong dang nhap duoc reception1, status=${rec_resp.status_code}
     ${rec_tok}=    Set Variable    ${rec_resp.json().token}
-    ${r1}=    Raw Delete With Auth    /api/Rooms/5    ${rec_tok}
-    Should Be True    ${r1.status_code} in [200, 204, 400, 403, 404]    msg=status=${r1.status_code}
+    # Xoa phong = thao tac quan tri -> phai 403 (dung id khong ton tai de khong pha du lieu)
+    ${r1}=    Raw Delete With Auth    /api/Rooms/999999    ${rec_tok}
+    Soft Assert True    ${r1.status_code} == 403    msg=DEFECT TC1.7: Receptionist goi duoc DELETE /api/Rooms (thieu Authorize(Roles)), status=${r1.status_code}
     ${r2}=    Raw Get With Auth    /api/AuditLogs    ${rec_tok}
-    Should Be True    ${r2.status_code} == 200    msg=status=${r2.status_code}
+    Soft Assert True    ${r2.status_code} == 403    msg=DEFECT TC1.7: Receptionist doc duoc /api/AuditLogs, status=${r2.status_code}
     ${r3}=    Raw Get With Auth    /api/Roles    ${rec_tok}
-    Should Be True    ${r3.status_code} == 200    msg=status=${r3.status_code}
+    Soft Assert True    ${r3.status_code} == 403    msg=DEFECT TC1.7: Receptionist doc duoc /api/Roles, status=${r3.status_code}
 
 Case TC1.8
     [Documentation]    [TS1] Quan ly vai trò & gán quyền (Roles/Permissions)
@@ -693,16 +791,29 @@ Case TC1.8
     Should Be True    ${r4.status_code} in [400, 404]    msg=status=${r4.status_code}
 
 Case TC1.9
-    [Documentation]    [TS1] Hồ sơ cá nhân, cập nhật thông tin & upload avatar
+    [Documentation]    [TS1] Hồ sơ Cá nhân, Cập nhật Thông tin & Upload Avatar
     Open Admin Route    /admin/profile
-    ${user_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"thang@gmail.com","password":"thang2005"}
-    ${tok}=    Set Variable    ${user_tok.json().token}
-    ${r1}=    Raw Put With Auth    /api/UserProfile/update-profile    json={"FullName":"Vo Minh Thang","Phone":"0912345678"}    ${tok}
+    ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
+    ${tok}=    Set Variable    ${admin_tok.json().token}
+    ${uid}=    Db Scalar    SELECT TOP 1 id FROM Users WHERE email='admin@hotel.com'
+    ${old_name}=    Db Scalar    SELECT TOP 1 full_name FROM Users WHERE id=${uid}
+    ${old_phone}=    Db Scalar    SELECT TOP 1 phone FROM Users WHERE id=${uid}
+    ${r1}=    Raw Put With Auth    /api/UserProfile/update-profile    json={"FullName":"Nguyen Quan Tri","Phone":"0912345678"}    ${tok}
     Should Be True    ${r1.status_code} == 200    msg=status=${r1.status_code}
-    ${name}=    Db Scalar    SELECT TOP 1 full_name FROM Users WHERE id=16
-    Should Be Equal    ${name}    Vo Minh Thang
-    ${avatar_url}=    Db Scalar    SELECT TOP 1 avatar_url FROM Users WHERE id=16
-    Soft Assert True    '${avatar_url}' == 'None' or '${avatar_url}' == ''    msg=AvatarUrl con null sau upload (defect TC1.9), value=${avatar_url}
+    ${name}=    Db Scalar    SELECT TOP 1 full_name FROM Users WHERE id=${uid}
+    Should Be Equal    ${name}    Nguyen Quan Tri    msg=DEFECT TC1.9: update-profile khong luu vao DB
+    # Buoc 3 cua Excel: upload avatar PNG
+    ${avatar}=    Set Variable    ${OUTPUT DIR}/avatar_tc19.png
+    Create File    ${avatar}    fake-png-content
+    ${before_url}=    Db Scalar    SELECT TOP 1 ISNULL(avatar_url,'NULL') FROM Users WHERE id=${uid}
+    ${up}=    Upload File With Auth    /api/UserProfile/upload-avatar    ${avatar}    ${tok}
+    Should Be True    ${up.status_code} == 200    msg=DEFECT TC1.9: upload-avatar loi, status=${up.status_code}
+    ${url}=    Set Variable    ${up.json()["avatarUrl"]}
+    Should Contain    ${url}    /avatars/    msg=DEFECT TC1.9: upload-avatar khong tra ve avatarUrl
+    # Buoc 4 cua Excel: kiem tra cot Users.avatar_url
+    ${after_url}=    Db Scalar    SELECT TOP 1 ISNULL(avatar_url,'NULL') FROM Users WHERE id=${uid}
+    Soft Assert True    '${after_url}' != '${before_url}'    msg=DEFECT TC1.9: upload-avatar tra ${url} nhung KHONG ghi Users.avatar_url, value=${after_url}
+    Run Keyword And Ignore Error    Raw Put With Auth    /api/UserProfile/update-profile    json={"FullName":"${old_name}","Phone":"${old_phone}"}    ${tok}
 
 Case TC2.1
     [Documentation]    [TS2] Quan ly hang phong & dat anh dai dien chinh (Primary Image)
@@ -776,17 +887,19 @@ Case TC2.4
     Should Be True    ${r2.status_code} in [200, 201, 400]    msg=status=${r2.status_code}
 
 Case TC2.5
-    [Documentation]    [TS2] CRUD Hang phong & Xác nhận Thiếu API Tạo/Sửa (RoomTypes) - defect: khong co POST/PUT
+    [Documentation]    [TS2] CRUD hang phong: backend PHAI co POST/PUT /api/RoomTypes
     Open Admin Route    /admin/room-types
-    ${body}=    Get Text    body
-    Should Not Contain    ${body}    Them hang phong moi
-    Should Not Contain    ${body}    Them moi hang phong
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
-    ${r1}=    Raw Post With Auth    /api/RoomTypes    json={"name":"Test Type","basePrice":500000,"capacityAdults":2}    ${tok}
-    Should Be True    ${r1.status_code} == 405 or ${r1.status_code} == 404    msg=status=${r1.status_code} (defect TC2.5: khong co POST)
-    ${r2}=    Raw Put With Auth    /api/RoomTypes/1    json={"name":"Test Type","basePrice":500000}    ${tok}
-    Should Be True    ${r2.status_code} == 405 or ${r2.status_code} == 404    msg=status=${r2.status_code} (defect TC2.5: khong co PUT)
+    ${rnd}=    Get Current Date    result_format=%Y%m%d%H%M%S
+    ${r1}=    Raw Post With Auth    /api/RoomTypes    json={"name":"Test Type ${rnd}","basePrice":500000,"capacityAdults":2}    ${tok}
+    Should Be True    ${r1.status_code} in [200, 201]    msg=DEFECT TC2.5: thieu POST /api/RoomTypes, status=${r1.status_code}
+    ${new_id}=    Get Id    ${r1}
+    Append To List    ${CREATED_ROOMTYPES}    ${new_id}
+    ${r2}=    Raw Put With Auth    /api/RoomTypes/${new_id}    json={"name":"Test Type Updated ${rnd}","basePrice":600000}    ${tok}
+    Should Be True    ${r2.status_code} == 200    msg=DEFECT TC2.5: thieu PUT /api/RoomTypes/{id}, status=${r2.status_code}
+    ${name}=    Db Scalar    SELECT TOP 1 name FROM Room_Types WHERE id=${new_id}
+    Should Contain    ${name}    Updated    msg=DEFECT TC2.5: PUT khong luu du lieu vao DB
 
 Case TC2.6
     [Documentation]    [TS2] Xóa Anh Phòng: File Vật lý vs URL Cloudinary - defect: khong goi Cloudinary destroy
@@ -800,7 +913,7 @@ Case TC2.6
     ${img_id}=    Db Scalar    SELECT TOP 1 id FROM Room_Images WHERE room_type_id=${first_id} ORDER BY id DESC
     ${r3}=    Raw Delete With Auth    /api/RoomTypes/images/${img_id}    ${tok}
     Should Be True    ${r3.status_code} == 200 or ${r3.status_code} == 204    msg=status=${r3.status_code}
-    Soft Assert True    True    msg=DEFECT TC2.6: hinh anh tren Cloudinary chua duoc goi ham huy (destroy)
+    Mark Defect    TC2.6: hinh anh tren Cloudinary chua duoc goi ham huy (destroy)
 
 Case TC2.7
     [Documentation]    [TS2] CRUD Phòng & Cập nhật Trạng thái với Giá trị Không hợp lệ
@@ -855,19 +968,26 @@ Case TC2.10
     Should Be True    ${r.status_code} in [200, 400]    msg=status=${r.status_code}
     ${cs}=    Db Scalar    SELECT TOP 1 cleaning_status FROM Rooms WHERE id=${room_id}
     Soft Assert True    '${cs}' == 'Dirty'    msg=CleaningStatus khong tu dong thanh Dirty khi CheckedOut (defect TC2.10), value=${cs}
-    Soft Assert True    True    msg=DEFECT TC2.10: khong co endpoint cap nhat CleaningStatus trong RoomsController
+    Mark Defect    TC2.10: khong co endpoint cap nhat CleaningStatus trong RoomsController
 
 Case TC2.11
-    [Documentation]    [TS2] CRUD Tiện nghi & Gán Tiện nghi cho Hạng phòng - defect: khong co API gan tien nghi
+    [Documentation]    [TS2] CRUD tien nghi va gan tien nghi cho hang phong: PHAI co endpoint gan
     Open Admin Route    /admin/amenities
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
-    ${r1}=    Raw Post With Auth    /api/Amenities    json={"Name":"Bon tam massage"}    ${tok}
-    Should Be True    ${r1.status_code} == 200 or ${r1.status_code} == 201    msg=status=${r1.status_code}
-    ${r2}=    Raw Post With Auth    /api/Amenities    json={"Name":"Wifi 6"}    ${tok}
-    Should Be True    ${r2.status_code} == 200 or ${r2.status_code} == 201    msg=status=${r2.status_code}
-    ${r3}=    Raw Post With Auth    /api/RoomTypes/1/amenities    json={"amenityId":1}    ${tok}
-    Should Be True    ${r3.status_code} == 404 or ${r3.status_code} == 405    msg=status=${r3.status_code} (defect TC2.11: khong co API gan tien nghi)
+    ${rnd}=    Get Current Date    result_format=%Y%m%d%H%M%S
+    ${r1}=    Raw Post With Auth    /api/Amenities    json={"Name":"Bon tam massage ${rnd}"}    ${tok}
+    Should Be True    ${r1.status_code} in [200, 201]    msg=status=${r1.status_code}
+    ${amenity_id}=    Db Scalar    SELECT TOP 1 id FROM Amenities WHERE name='Bon tam massage ${rnd}'
+    Append To List    ${CREATED_AMENITIES}    ${amenity_id}
+    ${r2}=    Raw Post With Auth    /api/Amenities    json={"Name":"Wifi 6 ${rnd}"}    ${tok}
+    Should Be True    ${r2.status_code} in [200, 201]    msg=status=${r2.status_code}
+    ${r2_id}=    Db Scalar    SELECT TOP 1 id FROM Amenities WHERE name='Wifi 6 ${rnd}'
+    Append To List    ${CREATED_AMENITIES}    ${r2_id}
+    ${r3}=    Raw Post With Auth    /api/RoomTypes/1/amenities    json={"amenityId":${amenity_id}}    ${tok}
+    Should Be True    ${r3.status_code} in [200, 201]    msg=DEFECT TC2.11: thieu API gan tien nghi cho hang phong, status=${r3.status_code}
+    ${linked}=    Db Scalar    SELECT COUNT(*) FROM RoomType_Amenities WHERE room_type_id=1 AND amenity_id=${amenity_id}
+    Should Be True    ${linked} > 0    msg=DEFECT TC2.11: tien nghi chua duoc gan trong DB
 
 Case TC3.1
     [Documentation]    [TS3] Tạo Đặt phòng Mới kèm Danh sách Chi tiết Phòng
@@ -899,15 +1019,18 @@ Case TC3.3
     ${tok}=    Set Variable    ${admin_tok.json().token}
     # Tao booking Confirmed de check-in
     ${r}=    Raw Post With Auth    /api/Bookings    json={"bookingCode":"BK-CI-${TS}","guestName":"CheckIn Test","guestPhone":"0911111111","guestEmail":"ci@test.com","status":"Confirmed","userId":1,"bookingDetails":[{"roomId":3,"roomTypeId":3,"checkInDate":"2026-11-01T14:00:00","checkOutDate":"2026-11-03T11:00:00","pricePerNight":700000}]}    ${tok}
-    Should Be True    ${r.status_code} in [200, 201]
+    Should Be True    ${r.status_code} in [200, 201]    msg=status=${r.status_code}
     ${bid}=    Get Id    ${r}
     Append To List    ${CREATED_BOOKINGS}    ${bid}
-    # PUT /api/Bookings/{id}/status -> "CheckedIn"
+    # Buoc 2: PUT /api/Bookings/{id}/status -> "CheckedIn"
     ${r2}=    Raw Put With Auth    /api/Bookings/${bid}/status    json="CheckedIn"    ${tok}
-    Should Be True    ${r2.status_code} in [200, 400]    msg=status=${r2.status_code}
-    # Kiem tra phong 3 chuyen sang Occupied
+    Should Be True    ${r2.status_code} == 200    msg=DEFECT TC3.3: check-in that bai, status=${r2.status_code}
+    # Buoc 3: Booking phai chuyen sang CheckedIn
+    ${st_bk}=    Db Scalar    SELECT TOP 1 status FROM Bookings WHERE id=${bid}
+    Should Be Equal    ${st_bk}    CheckedIn    msg=DEFECT TC3.3: Booking khong chuyen sang CheckedIn, current=${st_bk}
+    # Buoc 4: Phong phai chuyen sang Occupied
     ${st}=    Db Scalar    SELECT TOP 1 Status FROM Rooms WHERE Id=3
-    Soft Assert True    '${st}' == 'Occupied'    msg=DEFECT TC3.3: Backend chua dong bo Status phong sang Occupied khi check-in, current=${st}
+    Soft Assert True    '${st}' == 'Occupied'    msg=DEFECT TC3.3: check-in khong dong bo Status phong sang Occupied, current=${st}
 
 Case TC3.4
     [Documentation]    [TS3] Cập nhật Chi tiết Phòng & Xem Lịch sử Đặt phòng theo User
@@ -973,12 +1096,21 @@ Case TC3.7
     Should Be True    ${r5.status_code} in [200, 204, 400]    msg=status=${r5.status_code}
 
 Case TC3.8
-    [Documentation]    [TS3] E2E Website: Đặt phòng khi Chưa đăng nhập đến Thanh toán
-    # UI: mo trang chu website, tim phong, chon phong, dien thong tin, dat phong
+    [Documentation]    [TS3] E2E Website: dat phong khi chua dang nhap den thanh toan
     Open UI Page    ${BASE_URL}/
+    Wait For Elements State    body    visible    timeout=20s
     ${body}=    Get Text    body
-    Should Contain    ${body}    Phòng & Villa
-    # UI flow nhanh - chi kiem tra trang load duoc
+    Should Not Contain    ${body}    Internal Server Error
+    # Nua backend cua luong E2E: booking vua tao PHAI sinh hoa don de /my-bookings thanh toan duoc
+    ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
+    ${tok}=    Set Variable    ${admin_tok.json().token}
+    ${rnd}=    Get Current Date    result_format=%Y%m%d%H%M%S
+    ${bk}=    Raw Post With Auth    /api/Bookings    json={"bookingCode":"BK-E2E-${rnd}","guestName":"Guest E2E","guestPhone":"0900000000","guestEmail":"e2e@example.com","status":"Pending","userId":null,"bookingDetails":[{"roomId":3,"roomTypeId":3,"checkInDate":"2026-12-01T14:00:00","checkOutDate":"2026-12-03T11:00:00","pricePerNight":700000}]}    ${tok}
+    Should Be True    ${bk.status_code} in [200, 201]    msg=status=${bk.status_code}
+    ${booking_id}=    Get Id    ${bk}
+    Append To List    ${CREATED_BOOKINGS}    ${booking_id}
+    ${inv}=    Db Scalar    SELECT COUNT(*) FROM Invoices WHERE booking_id=${booking_id}
+    Should Be True    ${inv} > 0    msg=DEFECT TC3.8: Booking khong sinh Invoice nen khong the thanh toan tren /my-bookings
 
 Case TC3.9
     [Documentation]    [TS3] Luồng Trạng thái Booking & Chuyển trạng thái Sai
@@ -1021,7 +1153,9 @@ Case TC4.1
     Append To List    ${CREATED_SERVICES}    ${svc_id}
     # Xac nhan ràng buộc khong xoa danh muc neu con dich vu: xoa danh muc (DELETE /api/ServiceCategories/${cat_id}) -> chan
     ${r3}=    Raw Delete With Auth    /api/ServiceCategories/${cat_id}    ${tok}
-    Should Be True    ${r3.status_code} in [200, 204, 400, 500]    msg=status=${r3.status_code} (expect blocked)
+    Should Be True    ${r3.status_code} == 400    msg=DEFECT TC4.1: xoa duoc danh muc dang con dich vu, status=${r3.status_code}
+    ${still}=    Db Scalar    SELECT COUNT(*) FROM Service_Categories WHERE id=${cat_id}
+    Should Be Equal As Integers    ${still}    1    msg=DEFECT TC4.1: danh muc da bi xoa khoi DB
 
 Case TC4.2
     [Documentation]    [TS4] Tạo Đơn Dịch vụ Phát sinh cho Phòng đang Lưu trú
@@ -1035,44 +1169,61 @@ Case TC4.2
     Append To List    ${CREATED_BOOKINGS}    ${booking_detail_id}
 
 Case TC4.3
-    [Documentation]    [TS4] Cập nhật Nhanh Trạng thái Phòng trên Sơ đồ Housekeeping - defect: khong co API update nhanh
+    [Documentation]    [TS4] Cap nhat nhanh trang thai phong tren so do Housekeeping
     Open Admin Route    /admin/housekeeping
-    ${body}=    Get Text    body
-    Should Contain    ${body}    Sơ đồ phòng (Housekeeping)
+    Wait For Elements State    css=.ant-layout-content    visible    timeout=15s
+    # Defect that: component dang comment loi goi API cap nhat trang thai
+    ${src}=    Get File    ${CURDIR}/../frontend/src/pages/admin/Housekeeping/HousekeepingPage.jsx
+    Should Not Contain    ${src}    // await roomApi.updateRoomStatus    msg=DEFECT TC4.3: FE dang comment loi goi PATCH /Rooms/{id}/status
+    ${before}=    Db Scalar    SELECT TOP 1 status FROM Rooms WHERE id=3
+    ${tok}=    Make Admin Token
+    ${r}=    Raw Patch With Auth    /api/Rooms/3/status    json="Cleaning"    ${tok}
+    Should Be True    ${r.status_code} == 200    msg=status=${r.status_code}
+    ${after}=    Db Scalar    SELECT TOP 1 status FROM Rooms WHERE id=3
+    Should Be Equal    ${after}    Cleaning    msg=DEFECT TC4.3: PATCH khong cap nhat trang thai phong
+    Raw Patch With Auth    /api/Rooms/3/status    json="${before}"    ${tok}
 
 Case TC4.4
     [Documentation]    [TS4] Báo cáo Tiêu thụ / Thất thoát Vật tư trong Phòng (Report Usage)
     Open Admin Route    /admin/loss-compensation
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
-    # Kiểm tra RoomInventory id=11 (Khăn tắm qty 200 -> inUse 110, damaged 5, liquidated 10)
     ${inv_id}=    Db Scalar    SELECT TOP 1 Id FROM Room_Inventory WHERE EquipmentId=11
-    ${inv_id}=    Set Variable If    '${inv_id}' == ''    1    ${inv_id}
-    ${r1}=    Raw Post With Auth    /api/LossAndDamages/report-usage    json={"RoomInventoryId":${inv_id},"BookingDetailId":null,"Quantity":1,"Description":"Ly pha lê vỡ"}    ${tok}
-    Should Be True    ${r1.status_code} in [200, 201, 400]    msg=status=${r1.status_code}
-    # Xem bang Loss_And_Damages ton tai
-    ${cnt}=    Db Scalar    SELECT COUNT(*) FROM Loss_And_Damages
-    Soft Assert True    ${cnt} >= 0    msg=defect TC4.4: KPI normal count>=0
-    Soft Assert True    True    msg=DEFECT TC4.8: report-usage KHONG de tinh totalEquipmentQuantity dac
+    ${before}=    Db Scalar    SELECT COUNT(*) FROM Loss_And_Damages
+    ${r1}=    Raw Post With Auth    /api/LossAndDamages    json={"RoomInventoryId":${inv_id},"Quantity":2,"PenaltyAmount":300000,"Description":"Ly pha le vo"}    ${tok}
+    Should Be True    ${r1.status_code} in [200, 201]    msg=DEFECT TC4.4: khong tao duoc bien ban LossAndDamages, status=${r1.status_code}
+    ${lid}=    Get Id    ${r1}
+    ${after}=    Db Scalar    SELECT COUNT(*) FROM Loss_And_Damages
+    Should Be True    ${after} > ${before}    msg=DEFECT TC4.4: bien ban khong duoc luu vao bang Loss_And_Damages
+    ${qty}=    Db Scalar    SELECT TOP 1 quantity FROM Loss_And_Damages WHERE id=${lid}
+    Should Be Equal As Integers    ${qty}    2    msg=DEFECT TC4.4: so luong khong luu dung
+    ${fee}=    Db Scalar    SELECT TOP 1 penalty_amount FROM Loss_And_Damages WHERE id=${lid}
+    Should Be Equal As Numbers    ${fee}    300000    msg=DEFECT TC4.4: so tien den bu khong luu dung
+    Run Keyword And Ignore Error    Raw Delete With Auth    /api/LossAndDamages/${lid}    ${tok}
 
 Case TC4.5
     [Documentation]    [TS4] CRUD Dịch vụ & Chặn xóa Dịch vụ đang được sử dụng
     Open Admin Route    /admin/services
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
-    # Chỉnh sửa tên dịch vụ id=3 Massage đổi từ 500k lên 600k
-    ${r1}=    Raw Put With Auth    /api/Services/3    json={"id":3,"categoryId":1,"name":"Massage","price":600000}    ${tok}
-    Should Be True    ${r1.status_code} in [200, 400]    msg=status=${r1.status_code}
-    # Upload hình ảnh minh họa
-    Create File    tmp_img.png    Path
-    ${r2}=    Raw Post With Auth    /api/Services/3/images    file=tmp_img.png    ${tok}
-    Should Be True    ${r2.status_code} in [200, 201, 400, 404, 405]
-    # Chỉnh sửa đơn giá - số âm -> 400 (defect: soft assert)
-    ${r3}=    Raw Put With Auth    /api/Services/3    json={"id":3,"categoryId":1,"name":"Massage","price":-100000}    ${tok}
-    Soft Assert True    ${r3.status_code} == 400    msg=Dong gia am khong bi chan, status=${r3.status_code}
-    # Delete disused service -> 200 (dung duoc xoa neu khong dung)
-    ${r4}=    Raw Delete With Auth    /api/Services/3    ${tok}
-    Should Be True    ${r4.status_code} in [200, 204, 400, 500]    msg=status=${r4.status_code}
+    ${svc_id}=    Db Scalar    SELECT TOP 1 id FROM Services ORDER BY id
+    ${old_name}=    Db Scalar    SELECT TOP 1 name FROM Services WHERE id=${svc_id}
+    ${old_price}=    Db Scalar    SELECT TOP 1 price FROM Services WHERE id=${svc_id}
+    ${old_cat}=    Db Scalar    SELECT TOP 1 category_id FROM Services WHERE id=${svc_id}
+    # Sua don gia 500k -> 600k
+    ${r1}=    Raw Put With Auth    /api/Services/${svc_id}    json={"id":${svc_id},"categoryId":${old_cat},"name":"${old_name}","price":600000}    ${tok}
+    Should Be True    ${r1.status_code} == 200    msg=DEFECT TC4.5: PUT /api/Services/{id} loi, status=${r1.status_code}
+    ${new_price}=    Db Scalar    SELECT TOP 1 price FROM Services WHERE id=${svc_id}
+    Should Be Equal As Numbers    ${new_price}    600000    msg=DEFECT TC4.5: sua don gia khong luu vao DB
+    # Upload anh minh hoa cho dich vu
+    ${img}=    Set Variable    ${OUTPUT DIR}/service_image_tc45.png
+    Create File    ${img}    fake-image-content
+    ${r2}=    Upload File With Auth    /api/Services/${svc_id}/images    ${img}    ${tok}
+    Should Be True    ${r2.status_code} in [200, 201]    msg=DEFECT TC4.5: thieu endpoint upload anh dich vu, status=${r2.status_code}
+    # Don gia am phai bi chan
+    ${r3}=    Raw Put With Auth    /api/Services/${svc_id}    json={"id":${svc_id},"categoryId":${old_cat},"name":"${old_name}","price":-100000}    ${tok}
+    Should Be True    ${r3.status_code} == 400    msg=DEFECT TC4.5: dong gia am khong bi chan, status=${r3.status_code}
+    Run Keyword And Ignore Error    Raw Put With Auth    /api/Services/${svc_id}    json={"id":${svc_id},"categoryId":${old_cat},"name":"${old_name}","price":${old_price}}    ${tok}
 
 Case TC4.6
     [Documentation]    [TS4] OrderServices: Danh sách, Chi tiết, Cập nhật & Xóa
@@ -1108,60 +1259,124 @@ Case TC4.8
     ${inv_id}=    Db Scalar    SELECT TOP 1 Id FROM Room_Inventory WHERE EquipmentId=11
     Raw Post With Auth    /api/LossAndDamages/report-usage    json={"RoomInventoryId":${inv_id},"BookingDetailId":null,"Quantity":1,"Description":"Ly pha lê vỡ"}    ${tok}
     # Kiểm tra số lượng vat tu trong Equipments bi cong
-    Soft Assert True    True    msg=DEFECT TC4.8: Backend report-usage KHONG de tinh totalEquipmentQuantity dac
+    Mark Defect    TC4.8: Backend report-usage KHONG de tinh totalEquipmentQuantity dac
 
 Case TC5.1
     [Documentation]    [TS5] Tự động Tạo Hóa đơn từ Booking & Tính Thuế VAT 10%
     Open Admin Route    /admin/invoices
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
-    &{basic_data}=    Create Dictionary    BookingCode=BK-INV-${TS}    CheckInDate=2026-11-10    CheckOutDate=2026-11-12    UserId=1    Status=Confirmed
-    ${r1}=    Raw Post With Auth    /api/Bookings    json=${basic_data}    ${tok}
-    Should Be True    ${r1.status_code} in [200, 201, 400]
-    Soft Assert True    True    msg=DEFECT TC5.1: Invoice VAT 10% auto-calc
+    # Booking 2 dem x 1.500.000 = 3.000.000 tien phong
+    ${bk}=    Raw Post With Auth    /api/Bookings    json={"bookingCode":"BK-INV-${TS}","guestName":"Invoice Test","guestPhone":"0922222222","guestEmail":"inv@test.com","status":"CheckedOut","userId":1,"bookingDetails":[{"roomId":3,"roomTypeId":3,"checkInDate":"2026-12-01T14:00:00","checkOutDate":"2026-12-03T11:00:00","pricePerNight":1500000}]}    ${tok}
+    Should Be True    ${bk.status_code} in [200, 201]    msg=status=${bk.status_code}
+    ${bid}=    Get Id    ${bk}
+    Append To List    ${CREATED_BOOKINGS}    ${bid}
+    # Dich vu 500.000 + den bu thiet hai 200.000 = 700.000
+    ${inv}=    Raw Post With Auth    /api/Invoices    json={"bookingId":${bid},"totalServiceAmount":700000,"createdAt":"2026-11-10T00:00:00"}    ${tok}
+    Should Be True    ${inv.status_code} in [200, 201]    msg=DEFECT TC5.1: POST /api/Invoices loi, status=${inv.status_code}
+    ${inv_id}=    Get Id    ${inv}
+    Append To List    ${CREATED_INVOICES}    ${inv_id}
+    ${room}=    Db Scalar    SELECT TOP 1 total_room_amount FROM Invoices WHERE id=${inv_id}
+    Should Be Equal As Numbers    ${room}    3000000    msg=DEFECT TC5.1: TotalRoomAmount khong duoc tinh tu Booking, value=${room}
+    ${tax}=    Db Scalar    SELECT TOP 1 tax_amount FROM Invoices WHERE id=${inv_id}
+    Should Be Equal As Numbers    ${tax}    370000    msg=DEFECT TC5.1: VAT 10% tinh sai, value=${tax}
+    ${final}=    Db Scalar    SELECT TOP 1 final_total FROM Invoices WHERE id=${inv_id}
+    Should Be Equal As Numbers    ${final}    4070000    msg=DEFECT TC5.1: FinalTotal tinh sai, value=${final}
 
 Case TC5.2
-    [Documentation]    [TS5] Ghi nhận Thanh toán & Tự động Chuyển Trạng thái Hóa đơn sang Paid
+    [Documentation]    [TS5] Ghi nhận Thanh toán & Tự động Chuyển Hóa đơn sang Paid
     Open Admin Route    /admin/payments
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
-    ${r1}=    Raw Post With Auth    /api/Payments    json={"Amount":770000,"Method":"PAID_ON_ACCOUNT","BookingId":1,"UserId":1}    ${tok}
-    Should Be True    ${r1.status_code} in [200, 201, 400]
-    Soft Assert True    True    msg=DEFECT TC5.2: Invoice auto->Paid when payment failed
-    Soft Assert True    True    msg=DEFECT TC5.2: Payment column update
+    ${bk}=    Raw Post With Auth    /api/Bookings    json={"bookingCode":"BK-PAY-${TS}","guestName":"Payment Test","guestPhone":"0933333333","guestEmail":"pay@test.com","status":"CheckedOut","userId":1,"bookingDetails":[{"roomId":3,"roomTypeId":3,"checkInDate":"2026-12-05T14:00:00","checkOutDate":"2026-12-06T11:00:00","pricePerNight":2000000}]}    ${tok}
+    Should Be True    ${bk.status_code} in [200, 201]    msg=status=${bk.status_code}
+    ${bid}=    Get Id    ${bk}
+    Append To List    ${CREATED_BOOKINGS}    ${bid}
+    ${inv}=    Raw Post With Auth    /api/Invoices    json={"bookingId":${bid},"createdAt":"2026-11-10T00:00:00"}    ${tok}
+    Should Be True    ${inv.status_code} in [200, 201]    msg=status=${inv.status_code}
+    ${inv_id}=    Get Id    ${inv}
+    Append To List    ${CREATED_INVOICES}    ${inv_id}
+    ${final}=    Db Scalar    SELECT TOP 1 final_total FROM Invoices WHERE id=${inv_id}
+    ${pay}=    Raw Post With Auth    /api/Payments    json={"invoiceId":${inv_id},"paymentMethod":"Cash","amountPaid":${final},"transactionCode":"PAY-${TS}"}    ${tok}
+    Should Be True    ${pay.status_code} in [200, 201]    msg=DEFECT TC5.2: POST /api/Payments loi, status=${pay.status_code}
+    ${pid}=    Get Id    ${pay}
+    Append To List    ${CREATED_PAYMENTS}    ${pid}
+    ${st}=    Db Scalar    SELECT TOP 1 status FROM Invoices WHERE id=${inv_id}
+    Should Be Equal    ${st}    Paid    msg=DEFECT TC5.2: thanh toan du ${final} nhung Invoice khong chuyen Paid, current=${st}
 
 Case TC5.3
-    [Documentation]    [TS5] Khởi tạo Thanh toán Ví MoMo & Tạo Chữ ký Số HMAC-SHA256
+    [Documentation]    [TS5] Khoi tao thanh toan MoMo va tao chu ky HMAC-SHA256
     Open Admin Route    /admin/payments
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
-    ${r1}=    Raw Post With Auth    /api/Momo/create-payment    json={"InvoiceId":0,"Amount":700000,"OrderInfo":{"orderId":"O-${TS}"}}    ${tok}
-    Should Be True    ${r1.status_code} in [200, 201, 400, 500]
-    Soft Assert True    True    msg=DEFECT TC5.3: MoMo pay id not tracked
+    ${r1}=    Raw Post With Auth    /api/Momo/create-payment    json={"InvoiceId":0,"Amount":700000,"OrderInfo":"Test ${TS}"}    ${tok}
+    Should Be True    ${r1.status_code} in [200, 201, 400]    msg=DEFECT TC5.3: create-payment loi server, status=${r1.status_code}
+    IF    ${r1.status_code} == 200
+        ${pay_url}=    Set Variable    ${r1.json()["payUrl"]}
+        Should Not Be Empty    ${pay_url}    msg=DEFECT TC5.3: khong tra ve payUrl
+    END
 
 Case TC5.4
-    [Documentation]    [TS5] Xử lý Webhook IPN Callback & Xác nhận Return từ MoMo
+    [Documentation]    [TS5] Xu ly webhook IPN callback va xac nhan return tu MoMo
     Open Admin Route    /admin/payments
-    Soft Assert True    True    msg=DEFECT TC5.4: momo callback confirm no recompute
+    ${cfg}=    Get File    ${CURDIR}/../backend/appsettings.json
+    Should Match Regexp    ${cfg}    (?i)/api/momo/callback    msg=DEFECT TC5.4: IpnUrl khong tro ve backend /api/momo/callback
+    ${r}=    Raw Post    ${API_URL}/api/Momo/callback    json={"partnerCode":"MOMO","orderId":"MOMO123INV999999","amount":"1000","resultCode":0,"signature":"bad"}
+    Should Be True    ${r.status_code} in [400, 401, 403]    msg=DEFECT TC5.4: callback chap nhan request khong co chu ky hop le, status=${r.status_code}
 
 Case TC5.5
     [Documentation]    [TS5] Thanh toán Từng phần & Hoàn trạng thái khi Xóa Payment
     Open Admin Route    /admin/payments
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
-    ${r1}=    Raw Get With Auth    /api/Payments    ${tok}
-    Should Be True    ${r1.status_code} in [200, 401, 403]
+    ${bk}=    Raw Post With Auth    /api/Bookings    json={"bookingCode":"BK-PART-${TS}","guestName":"Partial Test","guestPhone":"0944444444","guestEmail":"part@test.com","status":"CheckedOut","userId":1,"bookingDetails":[{"roomId":3,"roomTypeId":3,"checkInDate":"2026-12-08T14:00:00","checkOutDate":"2026-12-09T11:00:00","pricePerNight":2000000}]}    ${tok}
+    Should Be True    ${bk.status_code} in [200, 201]    msg=status=${bk.status_code}
+    ${bid}=    Get Id    ${bk}
+    Append To List    ${CREATED_BOOKINGS}    ${bid}
+    ${inv}=    Raw Post With Auth    /api/Invoices    json={"bookingId":${bid},"createdAt":"2026-11-10T00:00:00"}    ${tok}
+    Should Be True    ${inv.status_code} in [200, 201]    msg=status=${inv.status_code}
+    ${inv_id}=    Get Id    ${inv}
+    Append To List    ${CREATED_INVOICES}    ${inv_id}
+    # Buoc 1: tra truoc 1.000.000 tren hoa don 2.000.000 -> PartiallyPaid
+    ${p1}=    Raw Post With Auth    /api/Payments    json={"invoiceId":${inv_id},"paymentMethod":"Cash","amountPaid":1000000,"transactionCode":"PART-${TS}"}    ${tok}
+    Should Be True    ${p1.status_code} in [200, 201]    msg=status=${p1.status_code}
+    ${pid}=    Get Id    ${p1}
+    ${st1}=    Db Scalar    SELECT TOP 1 status FROM Invoices WHERE id=${inv_id}
+    Soft Assert True    '${st1}' == 'PartiallyPaid'    msg=DEFECT TC5.5: tra 1.000.000/2.000.000 nhung Invoice khong chuyen PartiallyPaid, current=${st1}
+    # Buoc 2: xoa khoan thanh toan
+    ${del}=    Raw Delete With Auth    /api/Payments/${pid}    ${tok}
+    Should Be True    ${del.status_code} in [200, 204]    msg=DEFECT TC5.5: DELETE /api/Payments/{id} loi, status=${del.status_code}
+    # Buoc 3: hoan trang thai + so tien con no
+    ${cnt}=    Db Scalar    SELECT COUNT(*) FROM Payments WHERE invoice_id=${inv_id}
+    Should Be Equal As Integers    ${cnt}    0    msg=DEFECT TC5.5: payment chua bi xoa khoi DB
+    ${st2}=    Db Scalar    SELECT TOP 1 status FROM Invoices WHERE id=${inv_id}
+    Should Be Equal    ${st2}    Unpaid    msg=DEFECT TC5.5: Invoice khong hoan ve Unpaid sau khi xoa payment, current=${st2}
 
 Case TC5.6
     [Documentation]    [TS5] CRUD Hóa đơn & Ràng buộc Nhiều Hóa đơn cho một Booking
     Open Admin Route    /admin/invoices
-    # Fix: tra ve Expried None
-    Soft Assert True    True    msg=DEFECT TC5.6: multiple invoices allowed
+    ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
+    ${tok}=    Set Variable    ${admin_tok.json().token}
+    ${bk}=    Raw Post With Auth    /api/Bookings    json={"bookingCode":"BK-MULTI-${TS}","guestName":"Multi Invoice","guestPhone":"0955555555","guestEmail":"multi@test.com","status":"CheckedOut","userId":1,"bookingDetails":[{"roomId":3,"roomTypeId":3,"checkInDate":"2026-12-10T14:00:00","checkOutDate":"2026-12-11T11:00:00","pricePerNight":1000000}]}    ${tok}
+    Should Be True    ${bk.status_code} in [200, 201]    msg=status=${bk.status_code}
+    ${bid}=    Get Id    ${bk}
+    Append To List    ${CREATED_BOOKINGS}    ${bid}
+    ${inv1}=    Raw Post With Auth    /api/Invoices    json={"bookingId":${bid},"createdAt":"2026-11-10T00:00:00"}    ${tok}
+    Should Be True    ${inv1.status_code} in [200, 201]    msg=status=${inv1.status_code}
+    Append To List    ${CREATED_INVOICES}    ${inv1.id}
+    ${inv2}=    Raw Post With Auth    /api/Invoices    json={"bookingId":${bid},"createdAt":"2026-11-10T00:00:00"}    ${tok}
+    IF    ${inv2.status_code} == 200 or ${inv2.status_code} == 201
+        Append To List    ${CREATED_INVOICES}    ${inv2.id}
+    END
+    Should Be True    ${inv2.status_code} in [400, 409]    msg=DEFECT TC5.6: 1 booking duoc tao nhieu hoa don (status=${inv2.status_code}), khong co rang buoc
+    ${cnt}=    Db Scalar    SELECT COUNT(*) FROM Invoices WHERE booking_id=${bid}
+    Should Be Equal As Integers    ${cnt}    1    msg=DEFECT TC5.6: DB co ${cnt} hoa don cho cung 1 booking
 
 Case TC5.7
-    [Documentation]    [TS5] MoMo: Bảo mật Callback, Callback trùng & Lỗ hổng /confirm
+    [Documentation]    [TS5] MoMo: bao mat callback, callback trung va lo hong /confirm
     Open Admin Route    /admin/payments
-    Soft Assert True    True    msg=DEFECT TC5.7: confirm no signature recheck
+    ${r1}=    Raw Post    ${API_URL}/api/Momo/confirm    json={"orderId":"MOMO1INV999999","resultCode":0,"amount":1000,"transId":"FAKE","message":"forged"}
+    Should Be True    ${r1.status_code} == 400    msg=DEFECT TC5.7: /confirm khong kiem tra chu ky va so tien, status=${r1.status_code}
 
 Case TC5.8
     [Documentation]    [TS5] VAT & Giảm giá Biên: Làm tròn và FinalTotal Âm
@@ -1169,7 +1384,7 @@ Case TC5.8
     ${admin_tok}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"admin"}
     ${tok}=    Set Variable    ${admin_tok.json().token}
     ${r1}=    Raw Get With Auth    /api/Invoices    ${tok}
-    Should Be True    ${r1.status_code} in [200, 401, 403]
+    Should Be True    ${r1.status_code} == 200
 
 # ===================== TC6.1 ====================
 
@@ -1186,7 +1401,7 @@ Case TC6.2
     Wait For Elements State    css=.ant-table-tbody    visible    timeout=15s
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/Vouchers    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC6.3
     [Documentation]    [TS6] Tổng hợp & Rebuild Dashboard KPI theo Vai trò và Kỳ báo cáo
@@ -1202,7 +1417,7 @@ Case TC6.4
     Wait For Elements State    css=.ant-table-tbody    visible    timeout=15s
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/AuditLogs    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC6.5
     [Documentation]    [TS6] CRUD Địa điểm Du lịch & Ảnh Đại diện
@@ -1210,28 +1425,28 @@ Case TC6.5
     Wait For Elements State    css=.ant-table-tbody    visible    timeout=15s
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/Attractions    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC6.6
     [Documentation]    [TS6] Voucher: Validate min_booking_value / valid_from / valid_to / usage_limit ở Server
     Open Admin Route    /admin/vouchers
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/Vouchers    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC6.7
     [Documentation]    [TS6] Reviews: Từ chối, Sửa, Xóa & Kiểm soát Quyền sở hữu
     Open Admin Route    /admin/reviews
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/Reviews    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC6.8
     [Documentation]    [TS6] Articles: Slug, Publish/Unpublish & Ảnh bìa
     Open Admin Route    /admin/articles
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/Articles    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC6.9
     [Documentation]    [TS6] Dashboard KPI: Kỳ QUARTERLY/YEARLY, Lịch sử & Rebuild theo Kỳ
@@ -1245,21 +1460,21 @@ Case TC6.10
     Open Admin Route    /admin/audit-logs
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/AuditLogs?pageNumber=1&pageSize=10    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC6.11
     [Documentation]    [TS6] Notifications: CRUD, Đánh dấu Đã đọc & Cô lập Dữ liệu theo User
     Open Admin Route    /admin/notifications
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/Notifications    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC6.12
     [Documentation]    [TS6] Memberships: CRUD Hạng thành viên & Áp dụng Giảm giá
     Open Admin Route    /admin/memberships
     ${tok}=    Make Admin Token
     ${resp}=    Raw Get With Auth    /api/Memberships    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403]
+    Should Be True    ${resp.status_code} == 200
 
 Case TC7.1
     [Documentation]    [TS7] Mật khẩu Lưu Plaintext & So sánh Chuỗi thô
@@ -1298,17 +1513,24 @@ Case TC7.5
 Case TC7.6
     [Documentation]    [TS7] Brute-force Đăng nhập & Rate Limiting
     Open Admin Route    /admin/dashboard
-    FOR    ${i}    IN RANGE    3
-        ${resp}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"admin@hotel.com","password":"wrongpassword"}
+    ${rnd}=    Get Current Date    result_format=%Y%m%d%H%M%S
+    ${email}=    Catenate    brute${rnd}@resort.vn
+    FOR    ${i}    IN RANGE    10
+        ${resp}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"${email}","password":"wrongpassword"}
     END
-    Should Be True    ${resp.status_code} in [400, 401, 429]
+    Should Be True    ${resp.status_code} == 429    msg=DEFECT TC7.6: khong co rate-limit/lockout sau 10 lan sai lien tiep, status=${resp.status_code}
 
 Case TC7.7
     [Documentation]    [TS7] IDOR: Truy cập Booking của Người khác qua /Bookings/user/{id}
     Open Admin Route    /admin/bookings
-    ${tok}=    Make Admin Token
-    ${resp}=    Raw Get With Auth    /api/Bookings/user/999    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401, 403, 404]
+    ${a}=    Raw Post    ${API_URL}/api/Auth/login    json={"email":"guestA@gmail.com","password":"hash6"}
+    Should Be True    ${a.status_code} == 200    msg=Khong dang nhap duoc guestA, status=${a.status_code}
+    ${tok_a}=    Set Variable    ${a.json().token}
+    ${uid_b}=    Db Scalar    SELECT TOP 1 id FROM Users WHERE email='guestB@gmail.com'
+    ${resp}=    Raw Get With Auth    /api/Bookings/user/${uid_b}    ${tok_a}
+    Soft Assert True    ${resp.status_code} in [401, 403]    msg=DEFECT TC7.7: IDOR - guestA doc duoc booking cua guestB (status=${resp.status_code})
+    ${resp2}=    Raw Get    ${API_URL}/api/Bookings/user/${uid_b}
+    Soft Assert True    ${resp2.status_code} in [401, 403]    msg=DEFECT TC7.7: /api/Bookings/user/{id} khong yeu cau xac thuc (status=${resp2.status_code})
 
 Case TC7.8
     [Documentation]    [TS7] Toàn vẹn Dữ liệu: Unique, Khóa ngoại, Làm tròn & Múi giờ
@@ -1320,8 +1542,18 @@ Case TC7.9
     [Documentation]    [TS7] Hiệu năng: Danh sách không Phân trang, Purge khi GET & Rebuild Dashboard
     Open Admin Route    /admin/bookings
     ${tok}=    Make Admin Token
-    ${resp}=    Raw Get With Auth    /api/Bookings    ${tok}
-    Should Be True    ${resp.status_code} in [200, 401]
+    ${t0}=    Get Current Date    result_format=%s
+    ${r1}=    Raw Get With Auth    /api/Bookings    ${tok}
+    Should Be Equal As Integers    ${r1.status_code}    200    msg=DEFECT TC7.9: GET /api/Bookings loi, status=${r1.status_code}
+    ${r2}=    Raw Get With Auth    /api/Rooms    ${tok}
+    Should Be Equal As Integers    ${r2.status_code}    200    msg=DEFECT TC7.9: GET /api/Rooms loi, status=${r2.status_code}
+    ${t1}=    Get Current Date    result_format=%s
+    ${elapsed}=    Evaluate    ${t1} - ${t0}
+    Should Be True    ${elapsed} < 10    msg=Hieu nang: 2 API danh sach mat ${elapsed}s
+    ${paged1}=    Evaluate    any(k in '''${r1.text}'''.lower() for k in ('pagination', 'totalcount', 'pageindex', 'pagesize'))
+    Soft Assert True    ${paged1}    msg=DEFECT TC7.9: GET /api/Bookings tra mang tho, KHONG co phan trang
+    ${paged2}=    Evaluate    any(k in '''${r2.text}'''.lower() for k in ('pagination', 'totalcount', 'pageindex', 'pagesize'))
+    Soft Assert True    ${paged2}    msg=DEFECT TC7.9: GET /api/Rooms tra mang tho, KHONG co phan trang
 
 Case TC7.10
     [Documentation]    [TS7] Hồi quy Hợp đồng API & Phụ thuộc SignalR không dùng

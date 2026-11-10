@@ -95,6 +95,8 @@ npm run dev
 
 Robot suite có kiểm tra đăng nhập và một số trang admin khi được cấp tài khoản kiểm thử qua `TEST_ADMIN_EMAIL` và `TEST_ADMIN_PASSWORD`. Các bài kiểm tra tạo/sửa/xóa dữ liệu chỉ được chạy trên database clone dùng riêng cho test; không trỏ các luồng này vào database đang dùng chung. Những case cần payment/storage bên thứ ba, dữ liệu fixture chuyên biệt hoặc kiểm thử bảo mật chủ động sẽ được đánh dấu SKIP/BLOCKED thay vì báo PASS khi chưa kiểm tra hành vi đó. Các kiểm tra điều hướng trang admin chỉ xác nhận trang tải được, không thay thế test CRUD/permission đầy đủ.
 
+Lưu ý về cách báo lỗi: `Soft Assert` được kiểm tra lại trong `Test Teardown`, nên mọi khuyết điểm ghi nhận qua `Soft Assert`/`Mark Defect` đều làm test **FAIL** thay vì bị bỏ qua. Các case đã biết là khuyết điểm (thiếu `POST/PUT /api/RoomTypes`, thiếu API gán tiện nghi, Housekeeping chưa gọi API, MoMo IPN trỏ sai chỗ, `Booking` không sinh `Invoice`, ...) được khai báo trong `KNOWN_DEFECTS` của `tests/update_excel_results.py` và **luôn ghi Fail** vào Excel, kể cả khi kịch bản Robot cũ đang assert đúng lỗi đó. Khi sửa xong một khuyết điểm, cập nhật lại case tương ứng và xoá mã khỏi `KNOWN_DEFECTS`.
+
 ## 7. Chạy API smoke tests
 Khởi động Backend trước, sau đó mở PowerShell tại thư mục gốc dự án và chạy:
 ```powershell

@@ -10,6 +10,7 @@ Provides:
    and AttrDict responses (.token, ['token'], .id, ['id']).
 """
 import subprocess
+import os
 import requests
 import json
 
@@ -180,6 +181,23 @@ class processes:
     def raw_delete(self, url, headers=None):
         try:
             r = requests.delete(url, headers=headers, timeout=30)
+            return ApiResponse(r)
+        except Exception as e:
+            class Dummy:
+                status_code = 500
+                text = str(e)
+                def json(self): return AttrDict()
+            return Dummy()
+
+    def upload_file(self, url, file_path, field='file', headers=None):
+        """POST multipart/form-data. Dung cho POST /api/UserProfile/upload-avatar
+        va cac endpoint upload anh (IFormFile)."""
+        try:
+            hdrs = dict(headers) if headers else {}
+            hdrs.pop('Content-Type', None)  # de requests tu sinh boundary
+            with open(file_path, 'rb') as fh:
+                files = {field: (os.path.basename(file_path), fh, 'image/png')}
+                r = requests.post(url, files=files, headers=hdrs, timeout=60)
             return ApiResponse(r)
         except Exception as e:
             class Dummy:
