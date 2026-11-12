@@ -664,6 +664,10 @@ public partial class HotelDbContext : DbContext
                 .HasDefaultValue(true)
                 .HasColumnName("status");
 
+            entity.Property(e => e.AvatarUrl)
+                .HasMaxLength(500)
+                .HasColumnName("avatar_url");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");

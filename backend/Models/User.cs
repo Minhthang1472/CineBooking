@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelManagementApi.Models;
 
@@ -22,7 +23,8 @@ public partial class User
 
     public DateTime? CreatedAt { get; set; }
 
-    public string AvatarUrl { get; set; } = null!; // NEW PROPERTY - added for TC1.9 avatar upload
+    [Column("avatar_url")]
+    public string? AvatarUrl { get; set; }
 
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 

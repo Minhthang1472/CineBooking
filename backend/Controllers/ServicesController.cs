@@ -102,7 +102,7 @@ namespace HotelManagementApi.Controllers
 
         // POST: api/Services/{id}/images
         [HttpPost("{id}/images")]
-        public async Task<IActionResult> UploadServiceImage(int id, [FromForm] IFormFile file)
+        public async Task<IActionResult> UploadServiceImage(int id, IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("Vui lòng chọn ảnh hợp lệ.");
